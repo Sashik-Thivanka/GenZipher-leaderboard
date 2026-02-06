@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import FilterControls, { ViewMode } from "./filter-controls";
 import Podium from "./podium";
 import LeaderboardTable from "./leaderboard-table";
@@ -20,6 +20,7 @@ export default function LeaderboardShell({ entries, updatedAt }: LeaderboardShel
   const [searchTerm, setSearchTerm] = useState("");
   const [activeUniversity, setActiveUniversity] = useState("all");
   const [isPending, startTransition] = useTransition();
+  const autoRefreshTimer = useRef<NodeJS.Timeout | null>(null);
 
   const universities = useMemo(
     () => Array.from(new Set(clientEntries.map((entry) => entry.university))).sort(),
@@ -78,19 +79,35 @@ export default function LeaderboardShell({ entries, updatedAt }: LeaderboardShel
 
   const streakSummary = useMemo(() => summarizeStreaks(clientEntries), [clientEntries]);
 
+  const fetchStandings = async () => {
+    const response = await fetch("/api/standings", { cache: "no-store" });
+    const payload = await response.json();
+    const nextEntries = (payload.entries as StandingEntry[]).slice(0, 10);
+    setClientEntries(nextEntries);
+    setLastSyncedAt(payload.updatedAt ?? new Date().toISOString());
+  };
+
   const handleRefresh = () => {
     startTransition(async () => {
       try {
-        const response = await fetch("/api/standings", { cache: "no-store" });
-        const payload = await response.json();
-        const nextEntries = (payload.entries as StandingEntry[]).slice(0, 10);
-        setClientEntries(nextEntries);
-        setLastSyncedAt(payload.updatedAt ?? new Date().toISOString());
+        await fetchStandings();
       } catch (error) {
         console.error("Failed to refresh standings", error);
       }
     });
   };
+
+  useEffect(() => {
+    autoRefreshTimer.current = setInterval(() => {
+      fetchStandings().catch((error) => console.error("Auto-refresh failed", error));
+    }, 10000);
+
+    return () => {
+      if (autoRefreshTimer.current) {
+        clearInterval(autoRefreshTimer.current);
+      }
+    };
+  }, []);
 
   return (
     <div className="relative z-10 mx-auto w-full max-w-[120rem]">

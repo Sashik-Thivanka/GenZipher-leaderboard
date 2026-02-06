@@ -15,6 +15,25 @@ export default function LeaderboardTable({ entries }: LeaderboardTableProps) {
   const [sortKey, setSortKey] = useState<SortKey>("rank");
   const [direction, setDirection] = useState<"asc" | "desc">("asc");
 
+  const formatLastSubmission = (timestamp?: string | null) => {
+    if (!timestamp) {
+      return "--";
+    }
+    const parsed = new Date(timestamp);
+    if (Number.isNaN(parsed.getTime())) {
+      return "--";
+    }
+    const time = parsed.toLocaleTimeString(undefined, {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    const date = parsed.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+    });
+    return `${time} | ${date}`;
+  };
+
   const sorted = useMemo(() => {
     const copy = [...entries];
     copy.sort((a, b) => {
@@ -91,9 +110,7 @@ export default function LeaderboardTable({ entries }: LeaderboardTableProps) {
                 </td>
                 <td className="px-6 py-4 font-semibold text-ember">{entry.score}</td>
                 <td className="px-6 py-4 text-dusk-50">{entry.solved}</td>
-                <td className="px-6 py-4 text-dusk-100/80">
-                  {entry.lastSubmission ? new Date(entry.lastSubmission).toLocaleString() : "—"}
-                </td>
+                <td className="px-6 py-4 text-dusk-100/80">{formatLastSubmission(entry.lastSubmission)}</td>
               </tr>
             ))}
           </tbody>

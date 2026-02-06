@@ -47,6 +47,22 @@ export default function LeaderboardShell({ entries, updatedAt }: LeaderboardShel
 
   const streakSummary = useMemo(() => summarizeStreaks(clientEntries), [clientEntries]);
 
+  const lastSyncedDisplay = useMemo(() => {
+    const parsed = new Date(lastSyncedAt);
+    if (Number.isNaN(parsed.getTime())) {
+      return "--";
+    }
+    const time = parsed.toLocaleTimeString(undefined, {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    const date = parsed.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+    });
+    return `${time} | ${date}`;
+  }, [lastSyncedAt]);
+
   const fetchStandings = async () => {
     const response = await fetch("/api/standings", { cache: "no-store" });
     const payload = await response.json();
@@ -90,7 +106,7 @@ export default function LeaderboardShell({ entries, updatedAt }: LeaderboardShel
         <div className="flex-1">
           <p className="text-xs uppercase tracking-[0.35em] text-[#b0894d]">Data pulse</p>
           <p className="mt-2 text-lg font-serifDisplay text-dusk-50">Last synced</p>
-          <p className="text-sm">{new Date(lastSyncedAt).toLocaleString()}</p>
+          <p className="text-sm">{lastSyncedDisplay}</p>
         </div>
         <div className="flex-1">
           <p className="text-xs uppercase tracking-[0.35em] text-[#b0894d]">Longest streak</p>
@@ -101,7 +117,6 @@ export default function LeaderboardShell({ entries, updatedAt }: LeaderboardShel
           <Button className="w-full justify-center" glowing={false} onClick={handleRefresh} disabled={isPending}>
             {isPending ? "Refreshing..." : "Refresh feed"}
           </Button>
-          <p className="text-xs uppercase tracking-[0.35em] text-dusk-100/70">Pulls latest JSON</p>
         </div>
       </div>
 

@@ -73,7 +73,7 @@ export default function LeaderboardTable({ entries }: LeaderboardTableProps) {
           <tbody className="divide-y divide-white/5">
             {sorted.map((entry) => (
               <tr
-                key={entry.rank}
+                key={`${entry.rank}-${entry.team}`}
                 className={clsx(
                   "transition-all hover:bg-white/5",
                   entry.rank <= 3 && "bg-gradient-to-r from-white/5 via-transparent to-transparent"
@@ -93,8 +93,8 @@ export default function LeaderboardTable({ entries }: LeaderboardTableProps) {
                     </div>
                     <div>
                       <p className="text-lg font-semibold text-dusk-50">{entry.team}</p>
-                      <p className="text-sm uppercase tracking-[0.35em] text-dusk-100/70">
-                        {entry.members.join(" · ")}
+                      <p className="text-xs uppercase tracking-[0.35em] text-dusk-100/70">
+                        {entry.accountUrl.replace(/^\//, "").toUpperCase()}
                       </p>
                     </div>
                   </div>
@@ -103,7 +103,9 @@ export default function LeaderboardTable({ entries }: LeaderboardTableProps) {
                 <td className="px-6 py-4 font-semibold text-ember">{entry.score}</td>
                 <td className="px-6 py-4 text-dusk-50">{entry.solved}</td>
                 <td className="px-6 py-4 text-dusk-100">{entry.penalty}</td>
-                <td className="px-6 py-4 text-dusk-100/80">{entry.lastSubmission}</td>
+                <td className="px-6 py-4 text-dusk-100/80">
+                  {entry.lastSubmission ? new Date(entry.lastSubmission).toLocaleString() : "—"}
+                </td>
               </tr>
             ))}
           </tbody>

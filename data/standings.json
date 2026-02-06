@@ -15,148 +15,111 @@
       "rank": 1,
       "team": "Mythic Axiom",
       "university": "University of Moratuwa",
-      "avatar": "",
-      "members": ["Dilan", "Kasun", "Ishara"],
+      "accountUrl": "/teams/1",
       "score": 980,
       "penalty": 12,
       "solved": 8,
       "streak": 6,
-      "lastSubmission": "02 min ago",
-      "badge": "mythic"
+      "lastSubmission": "2026-01-09T04:12:00.000Z"
     },
     {
       "rank": 2,
       "team": "Order of Helios",
       "university": "University of Colombo School of Computing",
-      "avatar": "",
-      "members": ["Naveen", "Hashini", "Duvin"],
+      "accountUrl": "/teams/2",
       "score": 948,
       "penalty": 25,
       "solved": 8,
       "streak": 4,
-      "lastSubmission": "11 min ago",
-      "badge": "legend"
+      "lastSubmission": "2026-01-09T04:04:00.000Z"
     },
     {
       "rank": 3,
       "team": "Arcane Pulse",
       "university": "NSBM Green University",
-      "avatar": "",
-      "members": ["Ravindu", "Shehani", "Dev"],
+      "accountUrl": "/teams/3",
       "score": 921,
       "penalty": 31,
       "solved": 7,
       "streak": 5,
-      "lastSubmission": "19 min ago",
-      "badge": "guardian"
+      "lastSubmission": "2026-01-09T03:56:00.000Z"
     },
     {
       "rank": 4,
       "team": "Cipher Wardens",
       "university": "University of Peradeniya",
-      "avatar": "",
-      "members": ["Irosh", "Nethmi", "Imaad"],
+      "accountUrl": "/teams/4",
       "score": 896,
       "penalty": 37,
       "solved": 7,
       "streak": 3,
-      "lastSubmission": "24 min ago"
+      "lastSubmission": "2026-01-09T03:48:00.000Z"
     },
     {
       "rank": 5,
       "team": "Astral Bloom",
       "university": "University of Ruhuna",
-      "avatar": "",
-      "members": ["Chamodi", "Sasindu", "Rayan"],
+      "accountUrl": "/teams/5",
       "score": 874,
       "penalty": 42,
       "solved": 7,
       "streak": 2,
-      "lastSubmission": "31 min ago"
+      "lastSubmission": "2026-01-09T03:41:00.000Z"
     },
     {
       "rank": 6,
       "team": "Gilded Glyph",
       "university": "General Sir John Kotelawala Defence University",
-      "avatar": "",
-      "members": ["Mishen", "Anuki", "Vihan"],
+      "accountUrl": "/teams/6",
       "score": 861,
       "penalty": 55,
       "solved": 6,
       "streak": 4,
-      "lastSubmission": "38 min ago"
+      "lastSubmission": "2026-01-09T03:33:00.000Z"
     },
     {
       "rank": 7,
       "team": "Omen Protocol",
       "university": "National Institute of Business Management",
-      "avatar": "",
-      "members": ["Kristen", "Mithila", "Dishen"],
+      "accountUrl": "/teams/7",
       "score": 834,
       "penalty": 63,
       "solved": 6,
       "streak": 4,
-      "lastSubmission": "44 min ago"
+      "lastSubmission": "2026-01-09T03:26:00.000Z"
     },
     {
       "rank": 8,
       "team": "Starlit Quill",
       "university": "University of Kelaniya",
-      "avatar": "",
-      "members": ["Abir", "Shenaya", "Nathan"],
+      "accountUrl": "/teams/8",
       "score": 815,
       "penalty": 62,
       "solved": 5,
       "streak": 1,
-      "lastSubmission": "51 min ago"
+      "lastSubmission": "2026-01-09T03:19:00.000Z"
     },
     {
       "rank": 9,
       "team": "Veil Syndicate",
       "university": "University of Sri Jayewardenepura",
-      "avatar": "",
-      "members": ["Rishen", "Shimal", "Avani"],
+      "accountUrl": "/teams/9",
       "score": 792,
       "penalty": 77,
       "solved": 5,
       "streak": 2,
-      "lastSubmission": "56 min ago"
+      "lastSubmission": "2026-01-09T03:12:00.000Z"
     },
     {
       "rank": 10,
       "team": "Oracle's Loom",
       "university": "Informatics Institute of Technology",
-      "avatar": "",
-      "members": ["Heshan", "Minali", "Shawn"],
+      "accountUrl": "/teams/10",
       "score": 781,
       "penalty": 80,
       "solved": 5,
       "streak": 1,
-      "lastSubmission": "1 hr ago"
-    },
-    {
-      "rank": 11,
-      "team": "Nova Covenant",
-      "university": "SLIIT",
-      "avatar": "",
-      "members": ["Oshini", "Pasan", "Randika"],
-      "score": 766,
-      "penalty": 88,
-      "solved": 4,
-      "streak": 1,
-      "lastSubmission": "1 hr ago"
-    },
-    {
-      "rank": 12,
-      "team": "Runic Bloom",
-      "university": "Uva Wellassa University",
-      "avatar": "",
-      "members": ["Dewmini", "Sudeepa", "Navin"],
-      "score": 741,
-      "penalty": 95,
-      "solved": 4,
-      "streak": 2,
-      "lastSubmission": "1 hr ago"
+      "lastSubmission": "2026-01-09T03:05:00.000Z"
     }
   ]
 }

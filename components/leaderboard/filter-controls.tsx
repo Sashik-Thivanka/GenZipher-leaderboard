@@ -61,7 +61,7 @@ export default function FilterControls(props: FilterControlsProps) {
           <input
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
-            placeholder="Search team or member"
+            placeholder="Search team"
             className="w-full rounded-full border border-[#2d2011] bg-coal/70 py-3 pl-11 pr-4 text-sm text-dusk-50 placeholder:text-dusk-100/60 focus:border-ember/60 focus:outline-none"
           />
         </label>

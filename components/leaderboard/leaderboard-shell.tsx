@@ -27,13 +27,14 @@ export default function LeaderboardShell({ entries, updatedAt }: LeaderboardShel
   );
 
   const filtered = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
     return clientEntries.filter((entry) => {
       const matchesUniversity =
         activeUniversity === "all" || entry.university === activeUniversity;
       const matchesSearch =
-        searchTerm.trim().length === 0 ||
-        entry.team.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        entry.members.some((member) => member.toLowerCase().includes(searchTerm.toLowerCase()));
+        term.length === 0 ||
+        entry.team.toLowerCase().includes(term) ||
+        entry.university.toLowerCase().includes(term);
       return matchesUniversity && matchesSearch;
     });
   }, [clientEntries, activeUniversity, searchTerm]);
@@ -61,12 +62,12 @@ export default function LeaderboardShell({ entries, updatedAt }: LeaderboardShel
         rank: 0,
         team: university,
         university: "Guild composite",
-        members: [`${stats.teams} teams`],
+        accountUrl: `/universities/${encodeURIComponent(university)}`,
         score,
         penalty: stats.teams * 5,
         solved: Math.max(1, Math.round(score / 130)),
         streak: stats.teams,
-        lastSubmission: "Averaged",
+        lastSubmission: null,
       } satisfies StandingEntry;
     });
 
@@ -82,7 +83,8 @@ export default function LeaderboardShell({ entries, updatedAt }: LeaderboardShel
       try {
         const response = await fetch("/api/standings", { cache: "no-store" });
         const payload = await response.json();
-        setClientEntries(payload.entries as StandingEntry[]);
+        const nextEntries = (payload.entries as StandingEntry[]).slice(0, 10);
+        setClientEntries(nextEntries);
         setLastSyncedAt(payload.updatedAt ?? new Date().toISOString());
       } catch (error) {
         console.error("Failed to refresh standings", error);

@@ -45,7 +45,7 @@ export default function Podium({ entries }: PodiumProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: tier.rank * 0.05, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
             className={clsx(
-              "relative flex flex-col items-center justify-end rounded-[36px] border border-white/5 bg-white/5 px-6 pt-8 text-center",
+              "relative flex flex-col items-center justify-end rounded-[36px] border border-white/5 bg-white/5 px-6 pt-8 pb-10 text-center",
               tier.rank === 1 && "md:-translate-y-6"
             )}
           >

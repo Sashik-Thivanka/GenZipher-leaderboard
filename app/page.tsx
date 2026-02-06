@@ -22,9 +22,11 @@ export default async function Home() {
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
           <Button>Observe live</Button>
-          <Button className="bg-[#120a05] text-dusk-50" glowing={false}>
-            Export results
-          </Button>
+          <form action="/api/standings/export" method="GET" className="inline-flex">
+            <Button type="submit" className="bg-[#120a05] text-dusk-50" glowing={false}>
+              Export results
+            </Button>
+          </form>
         </div>
       </section>
 

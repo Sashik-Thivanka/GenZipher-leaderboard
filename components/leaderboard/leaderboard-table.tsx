@@ -9,7 +9,7 @@ interface LeaderboardTableProps {
   entries: StandingEntry[];
 }
 
-type SortKey = "rank" | "score" | "penalty" | "solved";
+type SortKey = "rank" | "score" | "solved";
 
 export default function LeaderboardTable({ entries }: LeaderboardTableProps) {
   const [sortKey, setSortKey] = useState<SortKey>("rank");
@@ -48,7 +48,6 @@ export default function LeaderboardTable({ entries }: LeaderboardTableProps) {
                 </button>
               </th>
               <th className="px-6 py-4 text-left">Team</th>
-              <th className="px-6 py-4 text-left">University</th>
               <th className="px-6 py-4 text-left">
                 <button onClick={() => toggleSort("score")} className="flex items-center gap-2">
                   Score
@@ -58,12 +57,6 @@ export default function LeaderboardTable({ entries }: LeaderboardTableProps) {
               <th className="px-6 py-4 text-left">
                 <button onClick={() => toggleSort("solved")} className="flex items-center gap-2">
                   Solved
-                  <ArrowUpDown className="h-3 w-3" />
-                </button>
-              </th>
-              <th className="px-6 py-4 text-left">
-                <button onClick={() => toggleSort("penalty")} className="flex items-center gap-2">
-                  Penalty
                   <ArrowUpDown className="h-3 w-3" />
                 </button>
               </th>
@@ -93,16 +86,11 @@ export default function LeaderboardTable({ entries }: LeaderboardTableProps) {
                     </div>
                     <div>
                       <p className="text-lg font-semibold text-dusk-50">{entry.team}</p>
-                      <p className="text-xs uppercase tracking-[0.35em] text-dusk-100/70">
-                        {entry.accountUrl.replace(/^\//, "").toUpperCase()}
-                      </p>
                     </div>
                   </div>
                 </td>
-                <td className="px-6 py-4 text-dusk-100">{entry.university}</td>
                 <td className="px-6 py-4 font-semibold text-ember">{entry.score}</td>
                 <td className="px-6 py-4 text-dusk-50">{entry.solved}</td>
-                <td className="px-6 py-4 text-dusk-100">{entry.penalty}</td>
                 <td className="px-6 py-4 text-dusk-100/80">
                   {entry.lastSubmission ? new Date(entry.lastSubmission).toLocaleString() : "—"}
                 </td>

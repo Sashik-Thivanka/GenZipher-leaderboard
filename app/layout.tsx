@@ -11,6 +11,9 @@ const amarante = Amarante({
 export const metadata: Metadata = {
   title: "GenZipher Leaderboard",
   description: "Live leaderboard experience for the GenZipher flagship hackathon.",
+  icons: {
+    icon: "/assets/favicon.svg",
+  },
 };
 
 export default function RootLayout({

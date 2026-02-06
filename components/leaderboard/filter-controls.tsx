@@ -1,24 +1,20 @@
 "use client";
 
 import clsx from "clsx";
-import { Search, Sparkles } from "lucide-react";
+import { Search } from "lucide-react";
 import { Dispatch, SetStateAction } from "react";
 
-export type ViewMode = "overall" | "universities" | "streaks";
+export type ViewMode = "overall" | "streaks";
 
 interface FilterControlsProps {
   viewMode: ViewMode;
   setViewMode: Dispatch<SetStateAction<ViewMode>>;
   searchTerm: string;
   setSearchTerm: Dispatch<SetStateAction<string>>;
-  activeUniversity: string;
-  setActiveUniversity: Dispatch<SetStateAction<string>>;
-  universityOptions: string[];
 }
 
 const tabs: { label: string; value: ViewMode; detail: string }[] = [
   { label: "Overall", value: "overall", detail: "Live standings" },
-  { label: "Universities", value: "universities", detail: "Median score" },
   { label: "Momentum", value: "streaks", detail: "Solve streaks" },
 ];
 
@@ -28,9 +24,6 @@ export default function FilterControls(props: FilterControlsProps) {
     setViewMode,
     searchTerm,
     setSearchTerm,
-    activeUniversity,
-    setActiveUniversity,
-    universityOptions,
   } = props;
 
   return (
@@ -64,23 +57,6 @@ export default function FilterControls(props: FilterControlsProps) {
             placeholder="Search team"
             className="w-full rounded-full border border-[#2d2011] bg-coal/70 py-3 pl-11 pr-4 text-sm text-dusk-50 placeholder:text-dusk-100/60 focus:border-ember/60 focus:outline-none"
           />
-        </label>
-
-        <label className="flex items-center gap-2 text-xs uppercase tracking-[0.35em] text-dusk-100/80">
-          <Sparkles className="h-4 w-4 text-ember" />
-          <span className="sr-only">University filter</span>
-          <select
-            value={activeUniversity}
-            onChange={(event) => setActiveUniversity(event.target.value)}
-            className="rounded-full border border-[#2d2011] bg-coal/70 px-5 py-3 text-[0.75rem] uppercase tracking-[0.2em] text-dusk-50 focus:border-ember/60 focus:outline-none"
-          >
-            <option value="all">All guilds</option>
-            {universityOptions.map((uni) => (
-              <option key={uni} value={uni}>
-                {uni}
-              </option>
-            ))}
-          </select>
         </label>
       </div>
     </section>

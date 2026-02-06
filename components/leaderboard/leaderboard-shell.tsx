@@ -5,7 +5,7 @@ import FilterControls, { ViewMode } from "./filter-controls";
 import Podium from "./podium";
 import LeaderboardTable from "./leaderboard-table";
 import { StandingEntry } from "@/lib/standings";
-import { buildUniversityMatrix, summarizeStreaks } from "@/lib/standings";
+import { summarizeStreaks } from "@/lib/standings";
 import Button from "@/components/ui/button";
 
 interface LeaderboardShellProps {
@@ -18,27 +18,18 @@ export default function LeaderboardShell({ entries, updatedAt }: LeaderboardShel
   const [lastSyncedAt, setLastSyncedAt] = useState(updatedAt);
   const [viewMode, setViewMode] = useState<ViewMode>("overall");
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeUniversity, setActiveUniversity] = useState("all");
   const [isPending, startTransition] = useTransition();
   const autoRefreshTimer = useRef<NodeJS.Timeout | null>(null);
-
-  const universities = useMemo(
-    () => Array.from(new Set(clientEntries.map((entry) => entry.university))).sort(),
-    [clientEntries]
-  );
 
   const filtered = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
     return clientEntries.filter((entry) => {
-      const matchesUniversity =
-        activeUniversity === "all" || entry.university === activeUniversity;
-      const matchesSearch =
-        term.length === 0 ||
-        entry.team.toLowerCase().includes(term) ||
-        entry.university.toLowerCase().includes(term);
-      return matchesUniversity && matchesSearch;
+      if (term.length === 0) {
+        return true;
+      }
+      return entry.team.toLowerCase().includes(term);
     });
-  }, [clientEntries, activeUniversity, searchTerm]);
+  }, [clientEntries, searchTerm]);
 
   const displayEntries = useMemo(() => {
     if (viewMode === "overall") {
@@ -51,31 +42,8 @@ export default function LeaderboardShell({ entries, updatedAt }: LeaderboardShel
         .map((entry, index) => ({ ...entry, rank: index + 1 }));
     }
 
-    const matrix = buildUniversityMatrix(
-      activeUniversity === "all"
-        ? filtered
-        : filtered.filter((entry) => entry.university === activeUniversity)
-    );
-
-    const grouped = Object.entries(matrix).map(([university, stats]) => {
-      const score = Math.round(stats.cumulativeScore / stats.teams);
-      return {
-        rank: 0,
-        team: university,
-        university: "Guild composite",
-        accountUrl: `/universities/${encodeURIComponent(university)}`,
-        score,
-        penalty: stats.teams * 5,
-        solved: Math.max(1, Math.round(score / 130)),
-        streak: stats.teams,
-        lastSubmission: null,
-      } satisfies StandingEntry;
-    });
-
-    return grouped
-      .sort((a, b) => b.score - a.score)
-      .map((entry, index) => ({ ...entry, rank: index + 1 }));
-  }, [filtered, viewMode, activeUniversity]);
+    return filtered;
+  }, [filtered, viewMode]);
 
   const streakSummary = useMemo(() => summarizeStreaks(clientEntries), [clientEntries]);
 
@@ -116,9 +84,6 @@ export default function LeaderboardShell({ entries, updatedAt }: LeaderboardShel
         setViewMode={setViewMode}
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
-        activeUniversity={activeUniversity}
-        setActiveUniversity={setActiveUniversity}
-        universityOptions={universities}
       />
 
       <div className="mt-6 flex flex-col gap-4 rounded-3xl border border-[#2d2011] bg-black/40 p-6 text-sm text-dusk-100 shadow-aurora backdrop-blur-xl lg:flex-row" data-gradient-border>

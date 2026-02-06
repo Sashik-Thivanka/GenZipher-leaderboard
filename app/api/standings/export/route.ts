@@ -7,7 +7,7 @@ function toCsvRow(values: (string | number | null)[]) {
       if (value === null || value === undefined) {
         return "";
       }
-          const cell = String(value).replace(/"/g, '""');
+      const cell = String(value).replace(/"/g, '""');
       return /[",\n]/.test(cell) ? `"${cell}"` : cell;
     })
     .join(",");
@@ -15,14 +15,12 @@ function toCsvRow(values: (string | number | null)[]) {
 
 export async function GET() {
   const standings = await getStandings();
-  const header = ["Rank", "Team", "University", "Score", "Penalty", "Solved", "Last Submission", "Team URL"];
+  const header = ["Rank", "Team", "Score", "Solved", "Last Submission", "Team URL"];
   const rows = standings.entries.map((entry) =>
     toCsvRow([
       entry.rank,
       entry.team,
-      entry.university,
       entry.score,
-      entry.penalty,
       entry.solved,
       entry.lastSubmission,
       entry.accountUrl,

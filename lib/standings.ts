@@ -25,10 +25,8 @@ export type BackendStandingsResponse = {
 export type StandingEntry = {
   rank: number;
   team: string;
-  university: string;
   accountUrl: string;
   score: number;
-  penalty: number;
   solved: number;
   streak: number;
   lastSubmission: string | null;
@@ -38,7 +36,6 @@ export type StandingsPayload = {
   updatedAt: string;
   summary: {
     liveParticipants: number;
-    universities: number;
     submissions: number;
     solveRate: number;
   };
@@ -87,10 +84,8 @@ export function mapBackendTeamToEntry(team: BackendTeam): StandingEntry {
   return {
     rank: 0,
     team: team.name,
-    university: team.bracket_name ?? "Independent",
     accountUrl: team.account_url,
     score: team.score,
-    penalty: Math.max(0, solved * 5), // Backend does not expose penalties, so approximate via solve count.
     solved,
     streak: solved,
     lastSubmission: sortedSolves[0]?.date ?? null,
@@ -99,12 +94,10 @@ export function mapBackendTeamToEntry(team: BackendTeam): StandingEntry {
 
 export function buildSummaryFromEntries(entries: StandingEntry[]): StandingsPayload["summary"] {
   const totalSolves = entries.reduce((acc, entry) => acc + entry.solved, 0);
-  const universities = new Set(entries.map((entry) => entry.university)).size;
   const solveRate = entries.length === 0 ? 0 : Math.min(100, Math.round((totalSolves / (entries.length * 10)) * 100));
 
   return {
     liveParticipants: entries.length,
-    universities,
     submissions: totalSolves,
     solveRate: Number.isFinite(solveRate) ? solveRate : 0,
   };
@@ -136,21 +129,6 @@ export function buildSpotlightFromEntries(entries: StandingEntry[]): StandingsPa
       ? `Latest solve synced at ${new Date(latestSolve.lastSubmission).toLocaleTimeString()}`
       : "Solves streaming in...",
   };
-}
-
-export function buildUniversityMatrix(entries: StandingEntry[]) {
-  return entries.reduce<Record<string, { teams: number; cumulativeScore: number }>>(
-    (acc, entry) => {
-      if (!acc[entry.university]) {
-        acc[entry.university] = { teams: 0, cumulativeScore: 0 };
-      }
-
-      acc[entry.university].teams += 1;
-      acc[entry.university].cumulativeScore += entry.score;
-      return acc;
-    },
-    {}
-  );
 }
 
 export function summarizeStreaks(entries: StandingEntry[]) {

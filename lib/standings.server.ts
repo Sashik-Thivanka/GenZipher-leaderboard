@@ -8,7 +8,6 @@ const fallbackPayload: StandingsPayload = {
   updatedAt: new Date().toISOString(),
   summary: {
     liveParticipants: 0,
-    universities: 0,
     submissions: 0,
     solveRate: 0,
   },

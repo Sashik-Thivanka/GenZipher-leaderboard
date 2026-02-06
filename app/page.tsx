@@ -3,6 +3,7 @@ import LeaderboardShell from "@/components/leaderboard/leaderboard-shell";
 import StatsBar from "@/components/leaderboard/stats-bar";
 import Button from "@/components/ui/button";
 import { getStandings } from "@/lib/standings.server";
+import Image from "next/image";
 
 export default async function Home() {
   const standings = await getStandings();
@@ -11,7 +12,15 @@ export default async function Home() {
     <main className="relative overflow-hidden px-4 pb-20 pt-10 sm:px-6 lg:px-10">
       <BackgroundMesh />
       <section className="relative z-10 mx-auto flex w-full max-w-6xl flex-col items-center text-center">
-        <p className="text-xs uppercase tracking-[0.5em] text-[#b0894d]">GenZipher 2026</p>
+        <Image
+          src="/assets/genzipher-text-logo-1.webp"
+          alt="GenZipher emblem"
+          width={260}
+          height={64}
+          priority
+          className="h-auto w-52 drop-shadow-[0_10px_25px_rgba(0,0,0,0.35)]"
+        />
+        <p className="mt-3 text-xs uppercase tracking-[0.5em] text-[#b0894d]">GenZipher 2026</p>
         <h1 className="mt-4 font-serifDisplay text-4xl text-dusk-50 sm:text-6xl">
           The Hall of Cipher Champions
         </h1>

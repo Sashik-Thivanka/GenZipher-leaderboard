@@ -1,25 +1,22 @@
-export type BackendSolve = {
-  challenge_id: number;
-  account_id: number;
-  team_id: number;
-  user_id: number;
-  value: number;
-  date: string;
+export type RemoteSolve = {
+  challenge: string;
+  points: number;
+  rank: number;
+  time?: string;
 };
 
-export type BackendTeam = {
-  id: number;
-  account_url: string;
-  name: string;
-  score: number;
-  bracket_id: number | null;
-  bracket_name: string | null;
-  solves: BackendSolve[];
+export type RemoteLeaderboardEntry = {
+  team: string;
+  total_score: number;
+  solve_count: number;
+  solves: RemoteSolve[];
+  rank: number;
 };
 
-export type BackendStandingsResponse = {
-  success: boolean;
-  data: Record<string, BackendTeam>;
+export type RemoteStandingsResponse = {
+  status: string;
+  generated_at?: string;
+  leaderboard: RemoteLeaderboardEntry[];
 };
 
 export type StandingEntry = {
@@ -31,6 +28,8 @@ export type StandingEntry = {
   streak: number;
   lastSubmission: string | null;
   scoreTimeline: { timestamp: string; score: number }[];
+  solves: RemoteSolve[];
+  signatureSolve: RemoteSolve | null;
 };
 
 export type StandingsPayload = {
@@ -48,9 +47,10 @@ export type StandingsPayload = {
 };
 
 const MAX_VISIBLE_TEAMS = 10;
+const SYNTHETIC_SOLVE_GAP_MS = 90_000;
 
-export function normalizeBackendPayload(payload: BackendStandingsResponse): StandingsPayload {
-  if (!payload?.success || !payload.data) {
+export function normalizeLeaderboardPayload(payload: RemoteStandingsResponse | null | undefined): StandingsPayload {
+  if (!payload || payload.status?.toLowerCase() !== "success" || !Array.isArray(payload.leaderboard)) {
     return {
       updatedAt: new Date().toISOString(),
       summary: buildSummaryFromEntries([]),
@@ -59,48 +59,91 @@ export function normalizeBackendPayload(payload: BackendStandingsResponse): Stan
     };
   }
 
-  const entries = Object.values(payload.data)
-    .map(mapBackendTeamToEntry)
-    .sort((a, b) => {
-      if (b.score === a.score) {
-        return (b.lastSubmission ?? "").localeCompare(a.lastSubmission ?? "");
-      }
-      return b.score - a.score;
-    })
+  const entries = payload.leaderboard
+    .filter((row) => typeof row.team === "string")
+    .map((row) => mapRemoteRowToEntry(row, payload.generated_at))
+    .sort((a, b) => a.rank - b.rank || b.score - a.score)
     .slice(0, MAX_VISIBLE_TEAMS)
     .map((entry, index) => ({ ...entry, rank: index + 1 }));
 
   return {
-    updatedAt: new Date().toISOString(),
+    updatedAt: payload.generated_at ?? new Date().toISOString(),
     summary: buildSummaryFromEntries(entries),
     spotlight: buildSpotlightFromEntries(entries),
     entries,
   };
 }
 
-export function mapBackendTeamToEntry(team: BackendTeam): StandingEntry {
-  const sortedSolves = [...team.solves].sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
-  const solved = team.solves.length;
-  const chronologicalSolves = [...team.solves].sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
-  const scoreTimeline = chronologicalSolves.reduce<{ timestamp: string; score: number }[]>(
-    (acc, solve) => {
-      const nextScore = (acc[acc.length - 1]?.score ?? 0) + solve.value;
-      acc.push({ timestamp: solve.date, score: nextScore });
-      return acc;
-    },
-    []
-  );
+export function mapRemoteRowToEntry(row: RemoteLeaderboardEntry, generatedAt?: string): StandingEntry {
+  const sanitizedSolves = Array.isArray(row.solves)
+    ? row.solves
+        .filter((solve) => typeof solve.challenge === "string")
+        .map((solve) => ({
+          challenge: solve.challenge,
+          points: Number.isFinite(Number(solve.points)) ? Number(solve.points) : 0,
+          rank: Number.isFinite(Number(solve.rank)) ? Number(solve.rank) : 0,
+          time: typeof solve.time === "string" ? solve.time : undefined,
+        }))
+    : [];
+  const scoreTimeline = buildTimelineFromSolves(sanitizedSolves, generatedAt);
+  const lastPoint = scoreTimeline[scoreTimeline.length - 1];
+  const lastSubmission = lastPoint?.timestamp ?? generatedAt ?? null;
+  const signatureSolve = sanitizedSolves.reduce<RemoteSolve | null>((best, solve) => {
+    if (!best || solve.points > best.points) {
+      return solve;
+    }
+    return best;
+  }, null);
 
   return {
-    rank: 0,
-    team: team.name,
-    accountUrl: team.account_url,
-    score: team.score,
-    solved,
-    streak: solved,
-    lastSubmission: sortedSolves[0]?.date ?? null,
+    rank: Number.isFinite(Number(row.rank)) ? Number(row.rank) : 0,
+    team: row.team,
+    accountUrl: "",
+    score: Number.isFinite(Number(row.total_score)) ? Number(row.total_score) : 0,
+    solved: Number.isFinite(Number(row.solve_count)) ? Number(row.solve_count) : sanitizedSolves.length,
+    streak: sanitizedSolves.length,
+    lastSubmission,
     scoreTimeline,
+    solves: sanitizedSolves,
+    signatureSolve,
   };
+}
+
+function buildTimelineFromSolves(solves: RemoteSolve[], generatedAt?: string) {
+  if (!solves.length) {
+    return [];
+  }
+
+  const solvesWithIndex = solves.map((solve, index) => ({ solve, index }));
+  solvesWithIndex.sort((a, b) => {
+    const timeA = Date.parse(a.solve.time ?? "");
+    const timeB = Date.parse(b.solve.time ?? "");
+    const aValid = Number.isNaN(timeA) ? 0 : 1;
+    const bValid = Number.isNaN(timeB) ? 0 : 1;
+    if (aValid && bValid) {
+      return timeA - timeB;
+    }
+    if (aValid) {
+      return -1;
+    }
+    if (bValid) {
+      return 1;
+    }
+    return a.index - b.index;
+  });
+
+  const reference = Date.parse(generatedAt ?? new Date().toISOString());
+  const fallbackAnchor = Number.isNaN(reference)
+    ? Date.now() - SYNTHETIC_SOLVE_GAP_MS * (solvesWithIndex.length - 1)
+    : reference - SYNTHETIC_SOLVE_GAP_MS * (solvesWithIndex.length - 1);
+
+  let rollingScore = 0;
+  return solvesWithIndex.map(({ solve }, position) => {
+    const parsed = Date.parse(solve.time ?? "");
+    const timestampMs = Number.isNaN(parsed) ? fallbackAnchor + position * SYNTHETIC_SOLVE_GAP_MS : parsed;
+    rollingScore += solve.points ?? 0;
+    return { timestamp: new Date(timestampMs).toISOString(), score: rollingScore };
+  });
 }
 
 export function buildSummaryFromEntries(entries: StandingEntry[]): StandingsPayload["summary"] {

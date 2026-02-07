@@ -9,6 +9,15 @@ interface ScoreTrendChartProps {
 
 export default function ScoreTrendChart({ entries }: ScoreTrendChartProps) {
   const [hoveredTrack, setHoveredTrack] = useState<{ team: string; color: string } | null>(null);
+  const VIEWBOX_WIDTH = 160;
+  const VIEWBOX_HEIGHT = 90;
+  const CHART_LEFT = 6;
+  const CHART_RIGHT = VIEWBOX_WIDTH - 4;
+  const CHART_TOP = 10;
+  const CHART_BOTTOM = VIEWBOX_HEIGHT - 8;
+  const CHART_HEIGHT = CHART_BOTTOM - CHART_TOP;
+  const CHART_WIDTH = CHART_RIGHT - CHART_LEFT;
+
   const chartData = useMemo(() => {
     const palette = ["#f87070", "#ffd166", "#9cdbff", "#f7aef8", "#70e4a9", "#c77dff", "#ff7eb9", "#fadb5f", "#72d6c9", "#ff9f68"];
 
@@ -38,13 +47,13 @@ export default function ScoreTrendChart({ entries }: ScoreTrendChartProps) {
     const series = prepared.map((item) => {
       const normalizedPoints = item.timeline.map((point) => {
         const timeOffset = Date.parse(point.timestamp) - minTimestamp;
-        const x = (timeOffset / timeRange) * 100;
-        const y = 92 - (point.score / scoreUpperBound) * 80;
+        const x = CHART_LEFT + (timeOffset / timeRange) * CHART_WIDTH;
+        const y = CHART_BOTTOM - (point.score / scoreUpperBound) * CHART_HEIGHT;
         return { x, y, raw: point };
       });
 
       if (normalizedPoints.length === 1) {
-        normalizedPoints.unshift({ x: 0, y: normalizedPoints[0].y, raw: normalizedPoints[0].raw });
+        normalizedPoints.unshift({ x: CHART_LEFT, y: normalizedPoints[0].y, raw: normalizedPoints[0].raw });
       }
 
       return {
@@ -57,14 +66,14 @@ export default function ScoreTrendChart({ entries }: ScoreTrendChartProps) {
 
     const scoreTicks = Array.from({ length: 5 }, (_, index) => {
       const value = (scoreUpperBound / 4) * index;
-      const y = 92 - (value / scoreUpperBound) * 80;
+      const y = CHART_BOTTOM - (value / scoreUpperBound) * CHART_HEIGHT;
       return { value, y };
     });
 
     const timeTicks = Array.from({ length: 4 }, (_, index) => {
       const ratio = index / 3;
       const timestamp = minTimestamp + ratio * timeRange;
-      return { label: new Date(timestamp), x: ratio * 100 };
+      return { label: new Date(timestamp), x: CHART_LEFT + ratio * CHART_WIDTH };
     });
 
     return {
@@ -72,8 +81,9 @@ export default function ScoreTrendChart({ entries }: ScoreTrendChartProps) {
       scoreTicks,
       timeTicks,
       scoreUpperBound,
+      frame: { left: CHART_LEFT, right: CHART_RIGHT, top: CHART_TOP, bottom: CHART_BOTTOM },
     };
-  }, [entries]);
+  }, [entries, CHART_LEFT, CHART_RIGHT, CHART_TOP, CHART_BOTTOM, CHART_HEIGHT, CHART_WIDTH]);
 
   if (!chartData) {
     return (
@@ -103,7 +113,7 @@ export default function ScoreTrendChart({ entries }: ScoreTrendChartProps) {
         </p>
       </div>
 
-      <div className="mt-10 grid gap-10 lg:grid-cols-[5fr,1.2fr] xl:grid-cols-[6fr,1.2fr]">
+      <div className="mt-10">
         <div className="relative isolate overflow-hidden rounded-[32px] border border-white/5 bg-gradient-to-b from-white/10 via-transparent to-transparent p-5 shadow-[0_30px_80px_rgba(0,0,0,0.45)] sm:p-7">
           <div className="pointer-events-none absolute inset-0 opacity-40" style={{ background: "radial-gradient(circle at 20% 20%, rgba(255,214,153,0.12), transparent 55%)" }} />
           <div className="pointer-events-none absolute left-5 top-5 flex items-center gap-2 rounded-full border border-white/10 bg-black/60 px-3 py-1 text-xs uppercase tracking-[0.3em] text-white/60">
@@ -117,16 +127,16 @@ export default function ScoreTrendChart({ entries }: ScoreTrendChartProps) {
             )}
           </div>
           <svg
-            viewBox="0 0 100 100"
-            className="h-[24rem] w-full md:h-[28rem] lg:h-[32rem]"
+              viewBox={`0 0 ${VIEWBOX_WIDTH} ${VIEWBOX_HEIGHT}`}
+              className="w-full aspect-video"
             role="img"
             aria-label="Score progression lines by team"
             onMouseLeave={() => setHoveredTrack(null)}
           >
             {chartData.scoreTicks.map((tick) => (
               <g key={tick.value}>
-                <line x1={0} y1={tick.y} x2={100} y2={tick.y} stroke="rgba(255,255,255,0.09)" strokeWidth={0.35} />
-                <text x={2} y={tick.y - 1} className="fill-white/45 text-[3px]" alignmentBaseline="middle">
+                  <line x1={chartData.frame.left} y1={tick.y} x2={chartData.frame.right} y2={tick.y} stroke="rgba(255,255,255,0.09)" strokeWidth={0.35} />
+                  <text x={chartData.frame.left - 2} y={tick.y - 1} className="fill-white/45 text-[3px]" alignmentBaseline="middle">
                   {tick.value.toLocaleString()}
                 </text>
               </g>
@@ -134,8 +144,8 @@ export default function ScoreTrendChart({ entries }: ScoreTrendChartProps) {
 
             {chartData.timeTicks.map((tick) => (
               <g key={tick.x}>
-                <line x1={tick.x} y1={12} x2={tick.x} y2={92} stroke="rgba(255,255,255,0.05)" strokeWidth={0.35} />
-                <text x={tick.x} y={96} textAnchor="middle" className="fill-white/55 text-[3px]">
+                  <line x1={tick.x} y1={chartData.frame.top} x2={tick.x} y2={chartData.frame.bottom} stroke="rgba(255,255,255,0.05)" strokeWidth={0.35} />
+                  <text x={tick.x} y={chartData.frame.bottom + 4} textAnchor="middle" className="fill-white/55 text-[3px]">
                   {tick.label.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                 </text>
               </g>
@@ -147,7 +157,7 @@ export default function ScoreTrendChart({ entries }: ScoreTrendChartProps) {
                   points={track.path}
                   fill="none"
                   stroke={track.color}
-                  strokeWidth={1.05}
+                  strokeWidth={0.7}
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   className="drop-shadow-[0_5px_12px_rgba(0,0,0,0.45)]"
@@ -176,30 +186,22 @@ export default function ScoreTrendChart({ entries }: ScoreTrendChartProps) {
             ))}
           </svg>
         </div>
+      </div>
 
-        <div className="rounded-[28px] border border-white/5 bg-[#0c0704]/80 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.4)]">
-          <p className="text-xs uppercase tracking-[0.35em] text-[#f4d3a4]/80">Legend</p>
-          <ul className="mt-4 space-y-3">
-            {chartData.series.map((track) => (
-              <li key={track.entry.team} className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-black/30 px-4 py-3">
-                <div className="flex items-center gap-2">
-                  <span className="h-3 w-3 rounded-full" style={{ backgroundColor: track.color }} />
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.3em] text-dusk-100/70">#{track.entry.rank}</p>
-                    <p className="text-base font-semibold text-dusk-50">{track.entry.team}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-[0.65rem] uppercase tracking-[0.3em] text-dusk-100/60">Score</p>
-                  <p className="text-lg font-semibold text-ember">{track.entry.score.toLocaleString()}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
-          <p className="mt-4 text-xs text-dusk-100/70">
-            Each point equals a registered solve from the API feed, so rapid bursts and stalls remain obvious when you compare guilds side-by-side.
-          </p>
-        </div>
+      <div className="mt-8 rounded-[26px] border border-white/5 bg-black/30 p-4 text-xs uppercase tracking-[0.25em] text-white/70">
+        <p>Legend</p>
+        <ul className="mt-4 flex flex-wrap gap-3 text-left text-[0.75rem] tracking-normal text-white/80">
+          {chartData.series.map((track) => (
+            <li key={track.entry.team} className="flex min-w-[12rem] items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-3 py-2">
+              <span className="h-3 w-3 rounded-full" style={{ backgroundColor: track.color }} />
+              <div className="flex flex-col leading-tight">
+                <span className="text-[0.65rem] uppercase tracking-[0.35em] text-white/50">#{track.entry.rank}</span>
+                <span className="text-base font-semibold text-dusk-50">{track.entry.team}</span>
+              </div>
+              <span className="ml-auto text-sm font-semibold text-ember">{track.entry.score.toLocaleString()}</span>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );

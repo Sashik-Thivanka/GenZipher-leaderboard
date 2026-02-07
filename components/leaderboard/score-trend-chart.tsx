@@ -1,13 +1,14 @@
 "use client";
 
 import { StandingEntry } from "@/lib/standings";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 interface ScoreTrendChartProps {
   entries: StandingEntry[];
 }
 
 export default function ScoreTrendChart({ entries }: ScoreTrendChartProps) {
+  const [hoveredTrack, setHoveredTrack] = useState<{ team: string; color: string } | null>(null);
   const chartData = useMemo(() => {
     const palette = ["#f87070", "#ffd166", "#9cdbff", "#f7aef8", "#70e4a9", "#c77dff", "#ff7eb9", "#fadb5f", "#72d6c9", "#ff9f68"];
 
@@ -105,7 +106,23 @@ export default function ScoreTrendChart({ entries }: ScoreTrendChartProps) {
       <div className="mt-10 grid gap-10 lg:grid-cols-[5fr,1.2fr] xl:grid-cols-[6fr,1.2fr]">
         <div className="relative isolate overflow-hidden rounded-[32px] border border-white/5 bg-gradient-to-b from-white/10 via-transparent to-transparent p-5 shadow-[0_30px_80px_rgba(0,0,0,0.45)] sm:p-7">
           <div className="pointer-events-none absolute inset-0 opacity-40" style={{ background: "radial-gradient(circle at 20% 20%, rgba(255,214,153,0.12), transparent 55%)" }} />
-          <svg viewBox="0 0 100 100" className="h-[24rem] w-full md:h-[28rem] lg:h-[32rem]" role="img" aria-label="Score progression lines by team">
+          <div className="pointer-events-none absolute left-5 top-5 flex items-center gap-2 rounded-full border border-white/10 bg-black/60 px-3 py-1 text-xs uppercase tracking-[0.3em] text-white/60">
+            {hoveredTrack ? (
+              <>
+                <span className="h-2 w-2 rounded-full" style={{ backgroundColor: hoveredTrack.color }} />
+                <span className="text-sm font-semibold normal-case tracking-normal text-dusk-50">{hoveredTrack.team}</span>
+              </>
+            ) : (
+              <span>Hover trace</span>
+            )}
+          </div>
+          <svg
+            viewBox="0 0 100 100"
+            className="h-[24rem] w-full md:h-[28rem] lg:h-[32rem]"
+            role="img"
+            aria-label="Score progression lines by team"
+            onMouseLeave={() => setHoveredTrack(null)}
+          >
             {chartData.scoreTicks.map((tick) => (
               <g key={tick.value}>
                 <line x1={0} y1={tick.y} x2={100} y2={tick.y} stroke="rgba(255,255,255,0.09)" strokeWidth={0.35} />
@@ -130,13 +147,30 @@ export default function ScoreTrendChart({ entries }: ScoreTrendChartProps) {
                   points={track.path}
                   fill="none"
                   stroke={track.color}
-                  strokeWidth={1.4}
+                  strokeWidth={1.05}
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="drop-shadow-[0_6px_16px_rgba(0,0,0,0.55)]"
+                  className="drop-shadow-[0_5px_12px_rgba(0,0,0,0.45)]"
+                  tabIndex={0}
+                  onMouseEnter={() => setHoveredTrack({ team: track.entry.team, color: track.color })}
+                  onFocus={() => setHoveredTrack({ team: track.entry.team, color: track.color })}
+                  onMouseLeave={() => setHoveredTrack(null)}
+                  onBlur={() => setHoveredTrack(null)}
                 />
                 {track.normalizedPoints.map((point, index) => (
-                  <circle key={`${track.entry.team}-${index}`} cx={point.x} cy={point.y} r={1.5} fill="#0a0603" stroke={track.color} strokeWidth={0.45} />
+                  <circle
+                    key={`${track.entry.team}-${index}`}
+                    cx={point.x}
+                    cy={point.y}
+                    r={1.35}
+                    fill="#0a0603"
+                    stroke={track.color}
+                    strokeWidth={0.4}
+                    onMouseEnter={() => setHoveredTrack({ team: track.entry.team, color: track.color })}
+                    onFocus={() => setHoveredTrack({ team: track.entry.team, color: track.color })}
+                    onMouseLeave={() => setHoveredTrack(null)}
+                    onBlur={() => setHoveredTrack(null)}
+                  />
                 ))}
               </g>
             ))}

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import FilterControls, { ViewMode } from "./filter-controls";
 import Podium from "./podium";
 import LeaderboardTable from "./leaderboard-table";
+import ScoreTrendChart from "./score-trend-chart";
 import { StandingEntry } from "@/lib/standings";
 import { summarizeStreaks } from "@/lib/standings";
 import Button from "@/components/ui/button";
@@ -122,6 +123,7 @@ export default function LeaderboardShell({ entries, updatedAt }: LeaderboardShel
 
       <Podium entries={displayEntries.slice(0, 3)} />
       <LeaderboardTable entries={displayEntries} />
+      <ScoreTrendChart entries={displayEntries} />
     </div>
   );
 }

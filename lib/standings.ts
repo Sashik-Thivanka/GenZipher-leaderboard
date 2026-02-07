@@ -30,6 +30,7 @@ export type StandingEntry = {
   solved: number;
   streak: number;
   lastSubmission: string | null;
+  scoreTimeline: { timestamp: string; score: number }[];
 };
 
 export type StandingsPayload = {
@@ -80,6 +81,15 @@ export function normalizeBackendPayload(payload: BackendStandingsResponse): Stan
 export function mapBackendTeamToEntry(team: BackendTeam): StandingEntry {
   const sortedSolves = [...team.solves].sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
   const solved = team.solves.length;
+  const chronologicalSolves = [...team.solves].sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
+  const scoreTimeline = chronologicalSolves.reduce<{ timestamp: string; score: number }[]>(
+    (acc, solve) => {
+      const nextScore = (acc[acc.length - 1]?.score ?? 0) + solve.value;
+      acc.push({ timestamp: solve.date, score: nextScore });
+      return acc;
+    },
+    []
+  );
 
   return {
     rank: 0,
@@ -89,6 +99,7 @@ export function mapBackendTeamToEntry(team: BackendTeam): StandingEntry {
     solved,
     streak: solved,
     lastSubmission: sortedSolves[0]?.date ?? null,
+    scoreTimeline,
   };
 }
 
